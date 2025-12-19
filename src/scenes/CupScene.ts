@@ -2,27 +2,34 @@ import { Container, type Renderer } from "pixi.js";
 import { Cup } from "../objects/Cup";
 
 export class CupScene extends Container {
-  private readonly cup: Cup;
-
+  private readonly cups: Cup[] = [];
+  
   constructor(private readonly renderer: Renderer) {
     super();
 
-    this.cup = new Cup();
-    this.addChild(this.cup);
-    this.centerCup();
+    this.createCups();
+    this.layout();
   }
 
-  private centerCup(): void {
-    const centerX = this.renderer.width / 2;
+  private createCups(): void {
+    for (let i = 0; i < 3; i++) {
+      const cup = new Cup();
+      this.cups.push(cup);
+      this.addChild(cup);
+    }
+  }
+
+  public layout(): void {
+    const spacing = 200;
+    const startX = this.renderer.width / 2 - spacing;
     const centerY = this.renderer.height / 2;
-    this.cup.position.set(centerX, centerY);
+
+    this.cups.forEach((cup, index) => {
+      cup.position.set(startX + index * spacing, centerY);
+    });
   }
 
   update(deltaTime: number): void {
-    this.cup.update(deltaTime);
-  }
-
-  layout(): void {
-    this.centerCup();
+    this.cups.forEach((cup) => cup.update(deltaTime));
   }
 }
