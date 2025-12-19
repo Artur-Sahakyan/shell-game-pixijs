@@ -1,4 +1,4 @@
-import { Container, type Renderer } from "pixi.js";
+import { Container, Graphics, type Renderer } from "pixi.js";
 import { Cup } from "../objects/Cup";
 
 export class CupScene extends Container {
@@ -8,6 +8,7 @@ export class CupScene extends Container {
     super();
 
     this.createCups();
+    this.placeDot();
     this.layout();
   }
 
@@ -17,6 +18,14 @@ export class CupScene extends Container {
       this.cups.push(cup);
       this.addChild(cup);
     }
+  }
+
+  private placeDot(): void {
+    const dot = new Graphics().circle(0, 0, 15).fill(0xffcc00);
+    dot.position.set(0, 20);
+    
+    const randomIndex = Math.floor(Math.random() * 3);
+    this.cups[randomIndex].content.addChild(dot);
   }
 
   public layout(): void {

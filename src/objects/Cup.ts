@@ -14,11 +14,15 @@ const ANIMATION = {
 
 export class Cup extends Container {
   private readonly cover: Container;
+  readonly content: Container;
   private isOpen = false;
   private targetY = 0;
 
   constructor() {
     super();
+    
+    this.content = new Container();
+    this.addChild(this.content);
     
     this.cover = this.createCup();
     this.setupClick();
