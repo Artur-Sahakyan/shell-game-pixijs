@@ -1,4 +1,4 @@
-import { Container, Graphics, type Renderer } from "pixi.js";
+import { Container, type Renderer } from "pixi.js";
 import { GAME_CONFIG } from "../config/game";
 import { randomInt } from "../utils/random";
 import { COLORS } from "../config/colors";
@@ -32,14 +32,9 @@ export class CupScene extends Container {
   }
 
   private handleCupClick(cup: Cup): void {
-    if (cup.index === this.dotIndex) {
-
-
-      this.showRestartButton();
-
-    } else {
-
-    }
+    console.log(cup, ' cup')
+    this.endGame();
+    this.showRestartButton();
   }
 
   private placeDot(): void {
@@ -74,6 +69,7 @@ export class CupScene extends Container {
   private restart(): void {
     this.cups.forEach((cup) => {
       cup.content.removeChildren();
+      cup.enable();
       cup.close();
     });
 
@@ -81,6 +77,10 @@ export class CupScene extends Container {
     this.restartButton = null;
 
     this.placeDot();
+  }
+
+  private endGame(): void {
+    this.cups.forEach((cup) => {cup.disable()});
   }
 
   public layout(): void {

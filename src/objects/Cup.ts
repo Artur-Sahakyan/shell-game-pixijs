@@ -45,20 +45,29 @@ export class Cup extends Container {
     this.on("pointerdown", () => this.toggle());
   }
 
+  public enable(): void {
+    this.eventMode = "static";
+    this.cursor = "pointer";
+  }
+
+  public disable(): void {
+    this.eventMode = "none";
+    this.cursor = "default";
+  }
+
   update(deltaTime: number): void {
     const progress = Math.min(1, (deltaTime / 60) * GAME_CONFIG.cup.animation.speed);
     this.cover.y += (this.targetY - this.cover.y) * progress;
   }
 
   toggle(): void {
-    console.log(this.content, ' content')
     this.isOpen = !this.isOpen;
     this.targetY = this.isOpen ? -GAME_CONFIG.cup.animation.liftDistance : 0;
   }
 
-  getIsOpen(): boolean {
-    return this.isOpen;
-  }
+  // getIsOpen(): boolean {
+  //   return this.isOpen;
+  // }
 
   close(): void {
     if (this.isOpen) {
