@@ -1,10 +1,11 @@
 import { Application } from "pixi.js";
+import { COLORS } from "../config/colors";
 
-export async function createApp(container: HTMLElement) {
+export async function createApp(container: HTMLElement): Promise<Application> {
   const app = new Application();
 
   await app.init({
-    background: "#0b1020",
+    background: COLORS.background,
     antialias: true,
     resizeTo: container,
   });

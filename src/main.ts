@@ -1,18 +1,10 @@
 import { createApp } from "./core/createApp";
-import { CupScene } from "./scenes/CupScene";
+import { Game } from "./core/Game";
 
 async function main() {
   const container = document.getElementById("app") ?? document.body;
-  
   const app = await createApp(container);
-  const scene = new CupScene(app.renderer);
-  app.stage.addChild(scene);
-  
-  window.addEventListener("resize", () => scene.layout());
-  
-  app.ticker.add((ticker) => {
-    scene.update(ticker.deltaTime);
-  });
+  new Game(app);
 }
 
 main();
