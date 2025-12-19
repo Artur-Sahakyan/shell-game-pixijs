@@ -1,22 +1,13 @@
 import { Container, Graphics } from "pixi.js";
-
-const CUP_COLORS = {
-  body: 0x2a3a6b,
-  rim: 0x3b57a3,
-  base: 0x1f2c55,
-};
-
-const ANIMATION = {
-  liftDistance: 120,
-  speed: 10,
-  snapThreshold: 0.2,
-};
+import { COLORS } from "../config/colors";
+import { GAME_CONFIG } from "../config/game";
 
 export class Cup extends Container {
   private readonly cover: Container;
   readonly content: Container;
   private isOpen = false;
   private targetY = 0;
+  public index: number = -1;
 
   constructor() {
     super();
@@ -24,11 +15,11 @@ export class Cup extends Container {
     this.content = new Container();
     this.addChild(this.content);
     
-    this.cover = this.createCup();
+    this.cover = this.createCover();
     this.setupClick();
   }
 
-  private createCup(): Container {
+  private createCover(): Container {
     const cover = new Container();
     const graphics = new Graphics();
     
@@ -38,9 +29,10 @@ export class Cup extends Container {
       .lineTo(50, 60)
       .lineTo(-50, 60)
       .closePath()
-      .fill(CUP_COLORS.body);
-    graphics.ellipse(0, -60, 70, 18).fill(CUP_COLORS.rim);    
-    graphics.ellipse(0, 60, 50, 14).fill(CUP_COLORS.base);
+      .fill(COLORS.cup.body);
+    
+    graphics.ellipse(0, -60, 70, 18).fill(COLORS.cup.rim);
+    graphics.ellipse(0, 60, 50, 14).fill(COLORS.cup.base);
     
     cover.addChild(graphics);
     this.addChild(cover);
@@ -54,13 +46,23 @@ export class Cup extends Container {
   }
 
   update(deltaTime: number): void {
-    const progress = Math.min(1, (deltaTime / 60) * ANIMATION.speed);
-    
+    const progress = Math.min(1, (deltaTime / 60) * GAME_CONFIG.cup.animation.speed);
     this.cover.y += (this.targetY - this.cover.y) * progress;
   }
 
   toggle(): void {
+    console.log(this.content, ' content')
     this.isOpen = !this.isOpen;
-    this.targetY = this.isOpen ? -ANIMATION.liftDistance : 0;
+    this.targetY = this.isOpen ? -GAME_CONFIG.cup.animation.liftDistance : 0;
+  }
+
+  getIsOpen(): boolean {
+    return this.isOpen;
+  }
+
+  close(): void {
+    if (this.isOpen) {
+      this.toggle();
+    }
   }
 }
