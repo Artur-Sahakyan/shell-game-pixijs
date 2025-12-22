@@ -34,7 +34,6 @@ export class CupScene extends Container {
 
     this.createCups();
     this.layout();
-    this.placeDot();
     this.showShuffleButton();
   }
 
@@ -69,8 +68,10 @@ export class CupScene extends Container {
 
     if (this.cups.length === 3) {
       const [a, b, c] = this.cupSlotIndex;
-      this.cupSlotIndex = Math.random() < 0.5 ? [c, a, b] : [b, c, a];
-    }
+      this.cupSlotIndex[0] = c;
+      this.cupSlotIndex[2] = b;
+      this.cupSlotIndex[1] = a;
+    } 
 
     this.applyCupPositions();
   }
@@ -90,6 +91,7 @@ export class CupScene extends Container {
     if (this.isShuffling) return;
     this.shuffleButton?.disable();
 
+    this.placeDot();
     const openCupsTimeMs = 1000;
 
     window.setTimeout(() => {
@@ -151,7 +153,6 @@ export class CupScene extends Container {
     this.restartButton = null;
     this.shuffleButton?.enable();
 
-    this.placeDot();
   }
 
   private endGame(): void {
