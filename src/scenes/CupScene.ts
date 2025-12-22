@@ -69,13 +69,7 @@ export class CupScene extends Container {
 
     if (this.cups.length === 3) {
       const [a, b, c] = this.cupSlotIndex;
-      this.cupSlotIndex[0] = c;
-      this.cupSlotIndex[2] = b;
-      this.cupSlotIndex[1] = a;
-    } else {
-      this.cupSlotIndex = this.cupSlotIndex.map(
-        (slot) => (slot - 1 + this.cups.length) % this.cups.length
-      );
+      this.cupSlotIndex = Math.random() < 0.5 ? [c, a, b] : [b, c, a];
     }
 
     this.applyCupPositions();
@@ -108,7 +102,6 @@ export class CupScene extends Container {
 
   private placeDot(): void {
     const dot = new Dot();
-    this.cups.forEach((c) => c.content.removeChildren());
     this.dotIndex = randomInt(0, this.cups.length - 1);
     this.cups[this.dotIndex].content.addChild(dot);
   }
@@ -158,8 +151,6 @@ export class CupScene extends Container {
     this.restartButton = null;
     this.shuffleButton?.enable();
 
-    this.cupSlotIndex = this.cups.map((_, i) => i);
-    this.applyCupPositions();
     this.placeDot();
   }
 
@@ -178,13 +169,6 @@ export class CupScene extends Container {
     }));
 
     this.applyCupPositions();
-
-    // if (this.shuffleButton) {
-    //     this.shuffleButton.position.set(
-    //     this.renderer.width / 2 - GAME_CONFIG.button.width / 2,
-    //     this.renderer.height / 2 + GAME_CONFIG.button.offsetY + 70
-    //   );
-    // }
   }
 
   update(deltaTime: number): void {
@@ -210,8 +194,8 @@ export class CupScene extends Container {
   }
 
   private moveCups(deltaTime: number): void {
-    const speed = 8;
-    const progress = Math.min(1, (deltaTime / 60) * speed);
+    const speed = 10;
+    const progress = Math.min(1, (deltaTime / 60)) * speed;
 
     this.cupTargets.forEach(({ cup, targetX, targetY }) => {
       cup.x += (targetX - cup.x) * progress;
