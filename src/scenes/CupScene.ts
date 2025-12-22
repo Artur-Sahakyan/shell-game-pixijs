@@ -33,16 +33,16 @@ export class CupScene extends Container {
     this.sortableChildren = true;
 
     this.createCups();
-    this.createShuffleButton();
     this.layout();
     this.placeDot();
+    this.showShuffleButton();
   }
 
   private createCups(): void {
     for (let i = 0; i < GAME_CONFIG.cup.count; i++) {
       const cup = new Cup();
       cup.index = i;
-
+      cup.disable();
       cup.on("pointerdown", () => this.handleCupClick(cup));
 
       this.cups.push(cup);
@@ -51,26 +51,6 @@ export class CupScene extends Container {
       this.cupSlotIndex[i] = i;
     }
   }
-
-  private createShuffleButton(): void {
-    if (this.shuffleButton) return;
-
-    this.shuffleButton = new Button({
-      text: "Shuffleee",
-      onClick: () => this.startShuffle(),
-    });
-
-    this.addChild(this.shuffleButton);
-  }
-
-  private hideShuffleButton(): void {
-    if (!this.shuffleButton) return;
-  
-    this.shuffleButton.removeFromParent();
-    this.shuffleButton.destroy();
-    this.shuffleButton = null;
-  }
-  
 
   private startShuffle(): void {
     if (this.isShuffling) return;
@@ -111,11 +91,19 @@ export class CupScene extends Container {
     });
   }
 
-  private handleCupClick(cup: Cup): void {
-    if (this.isShuffling) return
-    this.hideShuffleButton();
-    this.endGame();
-    this.showRestartButton();
+  private async handleCupClick(cup: Cup): Promise<void> {
+    console.log(cup, ' cup');
+    if (this.isShuffling) return;
+    this.shuffleButton?.disable();
+
+    const openCupsTimeMs = 1000;
+
+    window.setTimeout(() => {
+      this.cups.forEach((c) => c.open());
+      this.endGame();
+      this.showRestartButton();
+  
+    }, openCupsTimeMs);
   }
 
   private placeDot(): void {
@@ -123,6 +111,24 @@ export class CupScene extends Container {
     this.cups.forEach((c) => c.content.removeChildren());
     this.dotIndex = randomInt(0, this.cups.length - 1);
     this.cups[this.dotIndex].content.addChild(dot);
+  }
+
+  private showShuffleButton(): void {
+    if (this.shuffleButton) return;
+
+    this.shuffleButton = new Button({
+      text: "Shuffleee",
+      onClick: () => this.startShuffle(),
+    });
+
+    if (this.shuffleButton) {
+      this.shuffleButton.position.set(
+      this.renderer.width / 2 - GAME_CONFIG.button.width / 2,
+      this.renderer.height / 2 + GAME_CONFIG.button.offsetY + 70
+    );
+  }
+
+    this.addChild(this.shuffleButton);
   }
 
   private showRestartButton(): void {
@@ -144,12 +150,13 @@ export class CupScene extends Container {
   private restart(): void {
     this.cups.forEach((cup) => {
       cup.content.removeChildren();
-      cup.enable();
+      cup.disable();
       cup.close();
     });
 
     this.restartButton?.destroy();
     this.restartButton = null;
+    this.shuffleButton?.enable();
 
     this.cupSlotIndex = this.cups.map((_, i) => i);
     this.applyCupPositions();
@@ -172,12 +179,12 @@ export class CupScene extends Container {
 
     this.applyCupPositions();
 
-    if (this.shuffleButton) {
-        this.shuffleButton.position.set(
-        this.renderer.width / 2 - GAME_CONFIG.button.width / 2,
-        this.renderer.height / 2 + GAME_CONFIG.button.offsetY + 70
-      );
-    }
+    // if (this.shuffleButton) {
+    //     this.shuffleButton.position.set(
+    //     this.renderer.width / 2 - GAME_CONFIG.button.width / 2,
+    //     this.renderer.height / 2 + GAME_CONFIG.button.offsetY + 70
+    //   );
+    // }
   }
 
   update(deltaTime: number): void {

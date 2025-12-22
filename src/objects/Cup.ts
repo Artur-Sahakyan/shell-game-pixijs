@@ -60,18 +60,25 @@ export class Cup extends Container {
     this.cover.y += (this.targetY - this.cover.y) * progress;
   }
 
-  toggle(): void {
-    this.isOpen = !this.isOpen;
-    this.targetY = this.isOpen ? -GAME_CONFIG.cup.animation.liftDistance : 0;
+  public get isOpened(): boolean {
+    return this.isOpen;
   }
 
-  // getIsOpen(): boolean {
-  //   return this.isOpen;
-  // }
-
-  close(): void {
-    if (this.isOpen) {
-      this.toggle();
-    }
+  public open(): void {
+    if (this.isOpen) return;
+    this.isOpen = true;
+    this.targetY = -GAME_CONFIG.cup.animation.liftDistance;
   }
+
+  public close(): void {
+    if (!this.isOpen) return;
+    this.isOpen = false;
+    this.targetY = 0;
+  }
+
+  public toggle(): void {
+    if (this.isOpen) this.close();
+    else this.open();
+  }
+
 }
