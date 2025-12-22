@@ -1,6 +1,6 @@
 import { Container, Graphics, Text } from "pixi.js";
 
-interface ButtonOptions {
+export interface ButtonOptions {
   text: string;
   width?: number;
   height?: number;
@@ -12,6 +12,12 @@ interface ButtonOptions {
 }
 
 export class Button extends Container {
+  private bg: Graphics;
+  private labelText: Text;
+
+  private enabled = true;
+  private onClickHandler: (() => void) | null = null;
+
   constructor(options: ButtonOptions) {
     super();
 
@@ -22,25 +28,49 @@ export class Button extends Container {
     const fontSize = options.fontSize ?? 24;
     const borderRadius = options.borderRadius ?? 10;
 
-    const bg = new Graphics()
-      .roundRect(0, 0, width, height, borderRadius)
-      .fill(bgColor);
+    this.bg = new Graphics().roundRect(0, 0, width, height, borderRadius).fill(bgColor);
 
-    const text = new Text({
+    this.labelText = new Text({
       text: options.text,
       style: {
         fontSize,
         fill: textColor,
       },
     });
-    text.anchor.set(0.5);
-    text.position.set(width / 2, height / 2);
+    this.labelText.anchor.set(0.5);
+    this.labelText.position.set(width / 2, height / 2);
 
-    this.addChild(bg);
-    this.addChild(text);
+    this.addChild(this.bg);
+    this.addChild(this.labelText);
+
+    this.onClickHandler = options.onClick;
+
     this.eventMode = "static";
     this.cursor = "pointer";
-    this.on("pointerdown", options.onClick);
+
+    this.on("pointerdown", this.handlePointerDown);
+  }
+
+  private handlePointerDown = (): void => {
+    if (!this.enabled) return;
+    this.onClickHandler?.();
+  };
+
+  public disable(): void {
+    this.enabled = false;
+    this.eventMode = "none";
+    this.cursor = "default";
+    this.alpha = 0.5;
+  }
+
+  public enable(): void {
+    this.enabled = true;
+    this.eventMode = "static";
+    this.cursor = "pointer";
+    this.alpha = 1;
+  }
+
+  public setText(text: string): void {
+    this.labelText.text = text;
   }
 }
-
