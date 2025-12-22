@@ -60,9 +60,17 @@ export class CupScene extends Container {
       onClick: () => this.startShuffle(),
     });
 
-    this.shuffleButton.zIndex = 9999;
     this.addChild(this.shuffleButton);
   }
+
+  private hideShuffleButton(): void {
+    if (!this.shuffleButton) return;
+  
+    this.shuffleButton.removeFromParent();
+    this.shuffleButton.destroy();
+    this.shuffleButton = null;
+  }
+  
 
   private startShuffle(): void {
     if (this.isShuffling) return;
@@ -104,7 +112,8 @@ export class CupScene extends Container {
   }
 
   private handleCupClick(cup: Cup): void {
-    if (this.isShuffling) return;
+    if (this.isShuffling) return
+    this.hideShuffleButton();
     this.endGame();
     this.showRestartButton();
   }
@@ -129,7 +138,6 @@ export class CupScene extends Container {
       this.renderer.height / 2 + GAME_CONFIG.button.offsetY + 70
     );
 
-    this.restartButton.zIndex = 9999;
     this.addChild(this.restartButton);
   }
 
@@ -165,14 +173,11 @@ export class CupScene extends Container {
     this.applyCupPositions();
 
     if (this.shuffleButton) {
-      this.shuffleButton.position.set(
+        this.shuffleButton.position.set(
         this.renderer.width / 2 - GAME_CONFIG.button.width / 2,
-        this.renderer.height / 2 + GAME_CONFIG.button.offsetY
+        this.renderer.height / 2 + GAME_CONFIG.button.offsetY + 70
       );
-      this.shuffleButton.zIndex = 9999;
     }
-
-    if (this.restartButton) this.restartButton.zIndex = 9999;
   }
 
   update(deltaTime: number): void {
