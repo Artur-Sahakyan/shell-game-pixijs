@@ -23,6 +23,7 @@ export class CupScene extends Container {
   private isShuffling = false;
   private shuffleLeftMs = 0;
   private stepLeftMs = 0;
+  private isProcessingClick = false;
 
   private readonly stepIntervalMs = 400;
   private readonly totalShuffleMs = 2000;
@@ -86,9 +87,11 @@ export class CupScene extends Container {
     });
   }
 
-  private async handleCupClick(cup: Cup): Promise<void> {
-    console.log(cup, ' cup');
-    if (this.isShuffling) return;
+  private async handleCupClick(_cup: Cup): Promise<void> {
+    if (this.isShuffling || this.isProcessingClick) return;
+    
+    this.isProcessingClick = true;
+    this.cups.forEach((c) => c.disable());
     this.shuffleButton?.disable();
 
     this.placeDot();
@@ -98,11 +101,11 @@ export class CupScene extends Container {
       this.cups.forEach((c) => c.open());
       this.endGame();
       this.showRestartButton();
-  
     }, openCupsTimeMs);
   }
 
   private placeDot(): void {
+    this.cups.forEach((c) => c.content.removeChildren());
     const dot = new Dot();
     this.dotIndex = randomInt(0, this.cups.length - 1);
     this.cups[this.dotIndex].content.addChild(dot);
@@ -143,6 +146,7 @@ export class CupScene extends Container {
   }
 
   private restart(): void {
+    this.isProcessingClick = false;
     this.cups.forEach((cup) => {
       cup.content.removeChildren();
       cup.disable();
@@ -152,7 +156,6 @@ export class CupScene extends Container {
     this.restartButton?.destroy();
     this.restartButton = null;
     this.shuffleButton?.enable();
-
   }
 
   private endGame(): void {
