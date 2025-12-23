@@ -2,6 +2,7 @@ import { Container, type Renderer } from "pixi.js";
 import { getScale } from "../utils/responsive";
 import { GAME_CONFIG } from "../config/game";
 import { randomInt } from "../utils/random";
+import { playMoveSound, stopMoveSound } from "../utils/sound";
 import { Button } from "../ui/Button";
 import { Cup } from "../objects/Cup";
 import { Dot } from "../objects/Dot";
@@ -62,6 +63,7 @@ export class CupScene extends Container {
   private startShuffle(): void {
     if (this.isShuffling) return;
 
+    playMoveSound();
     this.isShuffling = true;
     this.shuffleLeftMs = this.totalShuffleMs;
     this.stepLeftMs = 0;
@@ -213,6 +215,7 @@ export class CupScene extends Container {
 
       if (this.shuffleLeftMs <= 0) {
         this.isShuffling = false;
+        stopMoveSound();
         this.cups.forEach((c) => c.enable());
       }
     }
