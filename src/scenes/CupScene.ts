@@ -1,4 +1,5 @@
 import { Container, type Renderer } from "pixi.js";
+import { getScale } from "../utils/responsive";
 import { GAME_CONFIG } from "../config/game";
 import { randomInt } from "../utils/random";
 import { Button } from "../ui/Button";
@@ -50,6 +51,12 @@ export class CupScene extends Container {
 
       this.cupSlotIndex[i] = i;
     }
+    this.updateCupScale();
+  }
+
+  private updateCupScale(): void {
+    const scale = getScale(this.renderer.width);
+    this.cups.forEach(cup => cup.scale.set(scale));
   }
 
   private startShuffle(): void {
@@ -119,14 +126,8 @@ export class CupScene extends Container {
       onClick: () => this.startShuffle(),
     });
 
-    if (this.shuffleButton) {
-      this.shuffleButton.position.set(
-      this.renderer.width / 2 - GAME_CONFIG.button.width / 2,
-      this.renderer.height / 2 + GAME_CONFIG.button.offsetY + 70
-    );
-  }
-
     this.addChild(this.shuffleButton);
+    this.updateButtonPositions();
   }
 
   private showRestartButton(): void {
@@ -137,12 +138,8 @@ export class CupScene extends Container {
       onClick: () => this.restart(),
     });
 
-    this.restartButton.position.set(
-      this.renderer.width / 2 - GAME_CONFIG.button.width / 2,
-      this.renderer.height / 2 + GAME_CONFIG.button.offsetY + 70
-    );
-
     this.addChild(this.restartButton);
+    this.updateButtonPositions();
   }
 
   private restart(): void {
@@ -163,16 +160,40 @@ export class CupScene extends Container {
   }
 
   public layout(): void {
-    const spacing = GAME_CONFIG.cup.spacing;
+    const scale = getScale(this.renderer.width);
+    const spacing = GAME_CONFIG.cup.spacing * scale;
     const startX = this.renderer.width / 2 - spacing;
     const centerY = this.renderer.height / 2;
 
+    this.updateCupScale();
     this.slots = this.cups.map((_, index) => ({
       x: startX + index * spacing,
       y: centerY,
     }));
 
     this.applyCupPositions();
+    this.updateButtonPositions();
+  }
+
+  private updateButtonPositions(): void {
+    const scale = getScale(this.renderer.width);
+    const y = this.renderer.height / 2 + GAME_CONFIG.button.offsetY * scale + 70 * scale;
+    
+    if (this.shuffleButton) {
+      this.shuffleButton.scale.set(scale);
+      this.shuffleButton.position.set(
+        this.renderer.width / 2 - (GAME_CONFIG.button.width * scale) / 2,
+        y,
+      );
+    }
+    
+    if (this.restartButton) {
+      this.restartButton.scale.set(scale);
+      this.restartButton.position.set(
+        this.renderer.width / 2 - (GAME_CONFIG.button.width * scale) / 2,
+        y,
+      );
+    }
   }
 
   update(deltaTime: number): void {
