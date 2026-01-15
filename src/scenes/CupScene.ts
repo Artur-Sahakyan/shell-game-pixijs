@@ -1,4 +1,4 @@
-import { Container, type Renderer } from "pixi.js";
+import { Container, type Renderer, Text } from "pixi.js";
 import { getScale } from "../utils/responsive";
 import { GAME_CONFIG } from "../config/game";
 import { randomInt } from "../utils/random";
@@ -15,9 +15,13 @@ export class CupScene extends Container {
 
   private restartButton: Button | null = null;
   private shuffleButton: Button | null = null;
+  private scoreText: Text | null = null;
 
   private slots: Pos[] = [];
   private cupSlotIndex: number[] = [];
+
+  private wins = 0;
+  private losses = 0;
 
   private cupTargets: { cup: Cup; targetX: number; targetY: number }[] = [];
   private readonly renderer: Renderer;
@@ -36,6 +40,7 @@ export class CupScene extends Container {
     this.sortableChildren = true;
 
     this.createCups();
+    this.createScoreDisplay();
     this.layout();
     this.showShuffleButton();
   }
@@ -96,7 +101,7 @@ export class CupScene extends Container {
     });
   }
 
-  private async handleCupClick(_cup: Cup): Promise<void> {
+  private async handleCupClick(cup: Cup): Promise<void> {
     if (this.isShuffling || this.isProcessingClick) return;
     
     this.isProcessingClick = true;
@@ -108,6 +113,16 @@ export class CupScene extends Container {
 
     window.setTimeout(() => {
       this.cups.forEach((c) => c.open());
+      const clickedIndex = cup.index;
+      const isWin = clickedIndex === this.dotIndex;
+      
+      if (isWin) {
+        this.wins++;
+      } else {
+        this.losses++;
+      }
+      
+      this.updateScoreDisplay();
       this.endGame();
       this.showRestartButton();
     }, openCupsTimeMs);
@@ -124,7 +139,7 @@ export class CupScene extends Container {
     if (this.shuffleButton) return;
 
     this.shuffleButton = new Button({
-      text: "Shuffleee",
+      text: "Shuffle",
       onClick: () => this.startShuffle(),
     });
 
@@ -142,6 +157,23 @@ export class CupScene extends Container {
 
     this.addChild(this.restartButton);
     this.updateButtonPositions();
+  }
+
+  private createScoreDisplay(): void {
+    this.scoreText = new Text({
+      text: "Score: 0 - 0",
+      style: {
+        fontSize: 24,
+        fill: 0xffffff,
+      },
+    });
+    this.addChild(this.scoreText);
+  }
+
+  private updateScoreDisplay(): void {
+    if (this.scoreText) {
+      this.scoreText.text = `Wins: ${this.wins} | Losses: ${this.losses}`;
+    }
   }
 
   private restart(): void {
@@ -194,6 +226,14 @@ export class CupScene extends Container {
       this.restartButton.position.set(
         this.renderer.width / 2 - (GAME_CONFIG.button.width * scale) / 2,
         y,
+      );
+    }
+
+    if (this.scoreText) {
+      this.scoreText.scale.set(scale);
+      this.scoreText.position.set(
+        20 * scale,
+        20 * scale,
       );
     }
   }
