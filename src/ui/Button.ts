@@ -23,18 +23,24 @@ export class Button extends Container {
 
     const width = options.width ?? 150;
     const height = options.height ?? 50;
-    const bgColor = options.bgColor ?? 0x4a90e2;
+    const bgColor = options.bgColor ?? 0x5a6fd8;
     const textColor = options.textColor ?? 0xffffff;
     const fontSize = options.fontSize ?? 24;
-    const borderRadius = options.borderRadius ?? 10;
+    const borderRadius = options.borderRadius ?? 12;
 
-    this.bg = new Graphics().roundRect(0, 0, width, height, borderRadius).fill(bgColor);
+    // Create button background with border
+    this.bg = new Graphics()
+      .roundRect(0, 0, width, height, borderRadius)
+      .fill(0x2a3a6b)
+      .roundRect(2, 2, width - 4, height - 4, borderRadius - 2)
+      .fill(bgColor);
 
     this.labelText = new Text({
       text: options.text,
       style: {
         fontSize,
         fill: textColor,
+        fontWeight: "600",
       },
     });
     this.labelText.anchor.set(0.5);
@@ -49,11 +55,24 @@ export class Button extends Container {
     this.cursor = "pointer";
 
     this.on("pointerdown", this.handlePointerDown);
+    this.on("pointerenter", this.handlePointerEnter);
+    this.on("pointerleave", this.handlePointerLeave);
   }
 
   private handlePointerDown = (): void => {
     if (!this.enabled) return;
+    this.alpha = 0.8;
     this.onClickHandler?.();
+  };
+
+  private handlePointerEnter = (): void => {
+    if (!this.enabled) return;
+    this.alpha = 0.9;
+  };
+
+  private handlePointerLeave = (): void => {
+    if (!this.enabled) return;
+    this.alpha = 1;
   };
 
   public disable(): void {

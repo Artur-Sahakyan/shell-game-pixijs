@@ -16,6 +16,8 @@ export class CupScene extends Container {
   private restartButton: Button | null = null;
   private shuffleButton: Button | null = null;
   private scoreText: Text | null = null;
+  private feedbackText: Text | null = null;
+  private feedbackAnimationTime = 0;
 
   private slots: Pos[] = [];
   private cupSlotIndex: number[] = [];
@@ -118,8 +120,10 @@ export class CupScene extends Container {
       
       if (isWin) {
         this.wins++;
+        this.showFeedback("You Win! 🎉", 0x4ade80);
       } else {
         this.losses++;
+        this.showFeedback("Try Again! 😔", 0xef4444);
       }
       
       this.updateScoreDisplay();
@@ -176,6 +180,30 @@ export class CupScene extends Container {
     }
   }
 
+  private showFeedback(message: string, color: number): void {
+    if (this.feedbackText) {
+      this.removeChild(this.feedbackText);
+      this.feedbackText.destroy();
+    }
+
+    this.feedbackText = new Text(message, {
+      fontSize: 48,
+      fill: color,
+      fontWeight: "bold",
+      stroke: 0x000000,
+    });
+    this.feedbackText.anchor.set(0.5);
+    this.feedbackText.position.set(
+      this.renderer.width / 2,
+      this.renderer.height / 2 - 150
+    );
+    this.feedbackText.alpha = 0;
+    this.feedbackText.scale.set(0.5);
+    
+    this.addChild(this.feedbackText);
+    this.feedbackAnimationTime = 2000; // 2 seconds
+  }
+
   private restart(): void {
     this.isProcessingClick = false;
     this.cups.forEach((cup) => {
@@ -183,6 +211,13 @@ export class CupScene extends Container {
       cup.disable();
       cup.close();
     });
+
+    if (this.feedbackText) {
+      this.removeChild(this.feedbackText);
+      this.feedbackText.destroy();
+      this.feedbackText = null;
+    }
+    this.feedbackAnimationTime = 0;
 
     this.restartButton?.destroy();
     this.restartButton = null;
@@ -236,11 +271,19 @@ export class CupScene extends Container {
         20 * scale,
       );
     }
+
+    if (this.feedbackText) {
+      this.feedbackText.position.set(
+        this.renderer.width / 2,
+        this.renderer.height / 2 - 150 * scale,
+      );
+    }
   }
 
   update(deltaTime: number): void {
     this.cups.forEach((cup) => cup.update(deltaTime));
     this.moveCups(deltaTime);
+    this.updateFeedback(deltaTime);
 
     if (this.isShuffling) {
       const deltaMs = (deltaTime / 60) * 1000;
@@ -258,6 +301,38 @@ export class CupScene extends Container {
         stopMoveSound();
         this.cups.forEach((c) => c.enable());
       }
+    }
+  }
+
+  private updateFeedback(deltaTime: number): void {
+    if (!this.feedbackText || this.feedbackAnimationTime <= 0) return;
+
+    const deltaMs = (deltaTime / 60) * 1000;
+    this.feedbackAnimationTime -= deltaMs;
+
+    if (this.feedbackAnimationTime > 0) {
+      const progress = 1 - (this.feedbackAnimationTime / 2000);
+      
+      // Fade in and scale up
+      if (progress < 0.3) {
+        const fadeProgress = progress / 0.3;
+        this.feedbackText.alpha = fadeProgress;
+        this.feedbackText.scale.set(0.5 + fadeProgress * 0.5);
+      }
+      // Hold
+      else if (progress < 0.7) {
+        this.feedbackText.alpha = 1;
+        this.feedbackText.scale.set(1);
+      }
+      // Fade out
+      else {
+        const fadeProgress = (progress - 0.7) / 0.3;
+        this.feedbackText.alpha = 1 - fadeProgress;
+        this.feedbackText.scale.set(1 - fadeProgress * 0.2);
+      }
+    } else {
+      // Animation complete
+      this.feedbackText.alpha = 0;
     }
   }
 
